@@ -64,8 +64,6 @@
   <div id="home" class="screen active">
     <h1>Five Game Arcade</h1>
     <p>Pick one of the five games below.</p>
-    <div class="hud" style="margin: 12px auto 4px; max-width: 900px; background: rgba(255,255,255,0.75); padding: 14px; border-radius: 16px;">
-      <div>Global High Score: <span id="globalHighScore">0</span></div>
       <div>Total Arcade Points: <span id="globalTotalScore">0</span></div>
     </div>
     <div class="menu">
@@ -90,9 +88,9 @@
         <button onclick="openGame('dart')">Play</button>
       </div>
       <div class="game-card">
-        <h2>5. Coming Soon</h2>
-        <p>Add your fifth game here.</p>
-        <button disabled>Soon</button>
+        <h2>5. Chicken Dodge Arena</h2>
+        <p>Move your chicken, dodge falling danger, and survive as long as you can.</p>
+        <button onclick="openGame('arena')">Play</button>
       </div>
     </div>
   </div>
@@ -147,6 +145,18 @@
     <button onclick="goHome()">Back to Menu</button>
   </div>
 
+  <div id="arena" class="screen">
+    <h1>Chicken Dodge Arena</h1>
+    <div class="hud">
+      <div>Score: <span id="arenaScore">0</span></div>
+      <div>Best: <span id="arenaBest">0</span></div>
+      <div>Lives: <span id="arenaLives">3</span></div>
+    </div>
+    <p class="small">Use arrow keys or A and D to move. Dodge the falling danger!</p>
+    <canvas id="arenaCanvas" width="900" height="520"></canvas>
+    <button onclick="goHome()">Back to Menu</button>
+  </div>
+
   <script>
     const screens = document.querySelectorAll('.screen');
     const canvas = document.getElementById('gameCanvas');
@@ -157,6 +167,8 @@
     const bctx = brickCanvas.getContext('2d');
     const dartCanvas = document.getElementById('dartCanvas');
     const dctx = dartCanvas.getContext('2d');
+    const arenaCanvas = document.getElementById('arenaCanvas');
+    const actx = arenaCanvas.getContext('2d');
     const scoreEl = document.getElementById('score');
     const bestScoreEl = document.getElementById('bestScore');
     const bestJumpsEl = document.getElementById('bestJumps');
@@ -173,11 +185,15 @@
     const dartBestEl = document.getElementById('dartBest');
     const dartThrowsEl = document.getElementById('dartThrows');
     const dartRoundEl = document.getElementById('dartRound');
+    const arenaScoreEl = document.getElementById('arenaScore');
+    const arenaBestEl = document.getElementById('arenaBest');
+    const arenaLivesEl = document.getElementById('arenaLives');
 
     let animationId;
     let flappyAnimationId;
     let brickAnimationId;
     let dartAnimationId;
+    let arenaAnimationId;
     let currentGame = 'home';
     let gameRunning = false;
     let speed = 5;
@@ -207,17 +223,11 @@
     let dartRound = 1;
     dartBestEl.textContent = dartBest;
 
-    function updateGlobalScores() {
-      const scores = [bestScore, flappyBest, brickBest, dartBest];
-      const globalHigh = Math.max(...scores);
-      const globalTotal = scores.reduce((sum, value) => sum + value, 0);
-      localStorage.setItem('arcadeGlobalHigh', globalHigh);
-      localStorage.setItem('arcadeGlobalTotal', globalTotal);
-      globalHighScoreEl.textContent = globalHigh;
-      globalTotalScoreEl.textContent = globalTotal;
-    }
-
-    updateGlobalScores();
+    let arenaRunning = false;
+    let arenaScore = 0;
+    let arenaLives = 3;
+    let arenaBest = Number(localStorage.getItem('chickenArenaBest') || 0);
+    arenaBestEl.textContent = arenaBest;
 
     const chicken = {
       x: 120,
@@ -246,6 +256,7 @@
       if (id === 'flappy') startFlappy();
       if (id === 'brick') startBrickGame();
       if (id === 'dart') startDartGame();
+      if (id === 'arena') startArenaGame();
     }
 
     function goHome() {
@@ -254,10 +265,12 @@
       flappyRunning = false;
       brickRunning = false;
       dartRunning = false;
+      arenaRunning = false;
       cancelAnimationFrame(animationId);
       cancelAnimationFrame(flappyAnimationId);
       cancelAnimationFrame(brickAnimationId);
       cancelAnimationFrame(dartAnimationId);
+      cancelAnimationFrame(arenaAnimationId);
       showScreen('home');
     }
 
@@ -323,7 +336,6 @@
             bestScore = score;
             localStorage.setItem('chickenBest', bestScore);
             bestScoreEl.textContent = bestScore;
-            updateGlobalScores();
           }
         }
       });
@@ -819,6 +831,178 @@
       brickAnimationId = requestAnimationFrame(brickLoop);
     }
 
+    const arenaChicken = {
+      x: 430,
+      y: 435,
+      width: 48,
+      height: 48,
+      speed: 8,
+      moveLeft: false,
+      moveRight: false
+    };
+
+    let arenaHazards = [];
+    let arenaFrame = 0;
+    let arenaSpawnRate = 48;
+    let arenaFallSpeed = 4.2;
+
+    function resetArenaPlayer() {
+      arenaChicken.x = 430;
+      arenaChicken.y = 435;
+      arenaChicken.moveLeft = false;
+      arenaChicken.moveRight = false;
+    }
+
+    function resetArenaHud() {
+      arenaScoreEl.textContent = arenaScore;
+      arenaBestEl.textContent = arenaBest;
+      arenaLivesEl.textContent = arenaLives;
+    }
+
+    function startArenaGame() {
+      arenaScore = 0;
+      arenaLives = 3;
+      arenaHazards = [];
+      arenaFrame = 0;
+      arenaSpawnRate = 48;
+      arenaFallSpeed = 4.2;
+      resetArenaPlayer();
+      resetArenaHud();
+      arenaRunning = true;
+      arenaLoop();
+    }
+
+    function spawnArenaHazard() {
+      const types = ['spike', 'rock', 'egg'];
+      const type = types[Math.floor(Math.random() * types.length)];
+      const width = type === 'rock' ? 34 : 28;
+      const height = type === 'rock' ? 34 : 30;
+      arenaHazards.push({ x: Math.random() * (arenaCanvas.width - width), y: -height, width, height, type, counted: false });
+    }
+
+    function hitArenaHazard() {
+      arenaLives--;
+      arenaLivesEl.textContent = arenaLives;
+      arenaHazards = [];
+      resetArenaPlayer();
+      if (arenaLives <= 0) arenaGameOver();
+    }
+
+    function updateArenaGame() {
+      arenaFrame++;
+      if (arenaFrame % arenaSpawnRate === 0) spawnArenaHazard();
+      if (arenaFrame % 420 === 0) {
+        arenaFallSpeed += 0.35;
+        arenaSpawnRate = Math.max(20, arenaSpawnRate - 2);
+      }
+
+      if (arenaChicken.moveLeft) arenaChicken.x -= arenaChicken.speed;
+      if (arenaChicken.moveRight) arenaChicken.x += arenaChicken.speed;
+      arenaChicken.x = Math.max(0, Math.min(arenaCanvas.width - arenaChicken.width, arenaChicken.x));
+
+      arenaHazards.forEach(hazard => {
+        hazard.y += arenaFallSpeed;
+        if (!hazard.counted && hazard.y > arenaCanvas.height) {
+          hazard.counted = true;
+          arenaScore++;
+          arenaScoreEl.textContent = arenaScore;
+          if (arenaScore > arenaBest) {
+            arenaBest = arenaScore;
+            localStorage.setItem('chickenArenaBest', arenaBest);
+            arenaBestEl.textContent = arenaBest;
+          }
+        }
+      });
+
+      arenaHazards = arenaHazards.filter(hazard => hazard.y < arenaCanvas.height + 50);
+
+      for (const hazard of arenaHazards) {
+        if (arenaChicken.x < hazard.x + hazard.width && arenaChicken.x + arenaChicken.width > hazard.x && arenaChicken.y < hazard.y + hazard.height && arenaChicken.y + arenaChicken.height > hazard.y) {
+          hitArenaHazard();
+          break;
+        }
+      }
+    }
+
+    function drawArenaChicken() {
+      actx.fillStyle = '#ffd54f';
+      actx.fillRect(arenaChicken.x, arenaChicken.y, arenaChicken.width, arenaChicken.height);
+      actx.fillStyle = '#111827';
+      actx.fillRect(arenaChicken.x + 10, arenaChicken.y + 10, 5, 5);
+      actx.fillStyle = '#ef4444';
+      actx.fillRect(arenaChicken.x + 8, arenaChicken.y - 6, 18, 8);
+      actx.fillStyle = '#f59e0b';
+      actx.fillRect(arenaChicken.x + 40, arenaChicken.y + 18, 10, 7);
+      actx.fillStyle = '#fbbf24';
+      actx.fillRect(arenaChicken.x + 14, arenaChicken.y + 18, 18, 12);
+    }
+
+    function drawArenaHazard(hazard) {
+      if (hazard.type === 'spike') {
+        actx.fillStyle = '#6b7280';
+        actx.beginPath();
+        actx.moveTo(hazard.x, hazard.y + hazard.height);
+        actx.lineTo(hazard.x + hazard.width / 2, hazard.y);
+        actx.lineTo(hazard.x + hazard.width, hazard.y + hazard.height);
+        actx.closePath();
+        actx.fill();
+      } else if (hazard.type === 'rock') {
+        actx.fillStyle = '#78716c';
+        actx.beginPath();
+        actx.arc(hazard.x + hazard.width / 2, hazard.y + hazard.height / 2, hazard.width / 2, 0, Math.PI * 2);
+        actx.fill();
+      } else {
+        actx.fillStyle = '#f8fafc';
+        actx.beginPath();
+        actx.ellipse(hazard.x + hazard.width / 2, hazard.y + hazard.height / 2, hazard.width / 2, hazard.height / 2, 0, 0, Math.PI * 2);
+        actx.fill();
+        actx.fillStyle = '#facc15';
+        actx.beginPath();
+        actx.ellipse(hazard.x + hazard.width / 2, hazard.y + hazard.height / 2, hazard.width / 5, hazard.height / 5, 0, 0, Math.PI * 2);
+        actx.fill();
+      }
+    }
+
+    function drawArenaGame() {
+      actx.clearRect(0, 0, arenaCanvas.width, arenaCanvas.height);
+      actx.fillStyle = '#bfdbfe';
+      actx.fillRect(0, 0, arenaCanvas.width, arenaCanvas.height);
+      actx.fillStyle = '#86efac';
+      actx.fillRect(0, 470, arenaCanvas.width, 50);
+      actx.fillStyle = '#ffffff';
+      actx.beginPath();
+      actx.arc(150, 95, 30, 0, Math.PI * 2);
+      actx.arc(185, 95, 25, 0, Math.PI * 2);
+      actx.arc(120, 102, 22, 0, Math.PI * 2);
+      actx.fill();
+      arenaHazards.forEach(drawArenaHazard);
+      drawArenaChicken();
+      actx.fillStyle = '#ffffff';
+      actx.font = '20px Arial';
+      actx.fillText('Dodge everything falling from the sky!', 20, 32);
+    }
+
+    function arenaGameOver() {
+      arenaRunning = false;
+      cancelAnimationFrame(arenaAnimationId);
+      drawArenaGame();
+      actx.fillStyle = 'rgba(0,0,0,0.45)';
+      actx.fillRect(0, 0, arenaCanvas.width, arenaCanvas.height);
+      actx.fillStyle = '#ffffff';
+      actx.font = '40px Arial';
+      actx.fillText('Game Over', arenaCanvas.width / 2 - 105, 200);
+      actx.font = '24px Arial';
+      actx.fillText('Score: ' + arenaScore, arenaCanvas.width / 2 - 50, 245);
+      actx.fillText('Press Space to restart', arenaCanvas.width / 2 - 110, 290);
+    }
+
+    function arenaLoop() {
+      if (!arenaRunning) return;
+      updateArenaGame();
+      drawArenaGame();
+      arenaAnimationId = requestAnimationFrame(arenaLoop);
+    }
+
     const dartPlayer = {
       x: 120,
       y: 410,
@@ -1050,6 +1234,7 @@
         if (currentGame === 'flappy') flap();
         if (currentGame === 'brick') launchBrickBall();
         if (currentGame === 'dart' && !dartRunning) startDartGame();
+        if (currentGame === 'arena' && !arenaRunning) startArenaGame();
       }
     });
 
@@ -1130,6 +1315,17 @@
       e.preventDefault();
       throwDartTo(aimPoint.x, aimPoint.y);
     }, { passive: false });
+
+    window.addEventListener('keydown', e => {
+      if (currentGame !== 'arena') return;
+      if (e.code === 'ArrowLeft' || e.code === 'KeyA') arenaChicken.moveLeft = true;
+      if (e.code === 'ArrowRight' || e.code === 'KeyD') arenaChicken.moveRight = true;
+    });
+
+    window.addEventListener('keyup', e => {
+      if (e.code === 'ArrowLeft' || e.code === 'KeyA') arenaChicken.moveLeft = false;
+      if (e.code === 'ArrowRight' || e.code === 'KeyD') arenaChicken.moveRight = false;
+    });
   </script>
 </body>
 </html>
