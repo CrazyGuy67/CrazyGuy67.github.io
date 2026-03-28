@@ -124,6 +124,31 @@
         <p>Move your chicken, dodge falling danger, and survive as long as you can.</p>
         <button onclick="openGame('arena')">Play</button>
       </div>
+      <div class="game-card">
+        <h2>6. Egg Catcher</h2>
+        <p>Catch good eggs, avoid rotten ones, and build your streak.</p>
+        <button onclick="openGame('egg')">Play</button>
+      </div>
+      <div class="game-card">
+        <h2>7. Space Chicken</h2>
+        <p>Fly through stars and dodge meteors in outer space.</p>
+        <button onclick="openGame('space')">Play</button>
+      </div>
+      <div class="game-card">
+        <h2>8. Memory Match</h2>
+        <p>Flip cards and match all the chicken pairs.</p>
+        <button onclick="openGame('memory')">Play</button>
+      </div>
+      <div class="game-card">
+        <h2>9. Whack-a-Fox</h2>
+        <p>Tap the sneaky foxes before they steal the eggs.</p>
+        <button onclick="openGame('fox')">Play</button>
+      </div>
+      <div class="game-card">
+        <h2>10. Chicken Sprint</h2>
+        <p>Dash between lanes, grab corn, and avoid rolling hay.</p>
+        <button onclick="openGame('sprint')">Play</button>
+      </div>
     </div>
   </div>
 
@@ -184,8 +209,67 @@
       <div>Best: <span id="arenaBest">0</span></div>
       <div>Lives: <span id="arenaLives">3</span></div>
     </div>
-    <p class="small">Use arrow keys or A and D to move. Dodge the falling danger!</p>
+    <p class="small">Use arrow keys or A and D to move. On mobile, press the left or right half of the screen.</p>
     <canvas id="arenaCanvas" width="900" height="520"></canvas>
+    <button onclick="goHome()">Back to Menu</button>
+  </div>
+
+  <div id="egg" class="screen">
+    <h1>Egg Catcher</h1>
+    <div class="hud">
+      <div>Score: <span id="eggScore">0</span></div>
+      <div>Best: <span id="eggBest">0</span></div>
+      <div>Lives: <span id="eggLives">3</span></div>
+    </div>
+    <p class="small">Move left and right to catch fresh eggs and avoid rotten eggs.</p>
+    <canvas id="eggCanvas" width="900" height="520"></canvas>
+    <button onclick="goHome()">Back to Menu</button>
+  </div>
+
+  <div id="space" class="screen">
+    <h1>Space Chicken</h1>
+    <div class="hud">
+      <div>Score: <span id="spaceScore">0</span></div>
+      <div>Best: <span id="spaceBest">0</span></div>
+    </div>
+    <p class="small">Tap, click, or press Space to fly up. Dodge meteors and collect stars.</p>
+    <canvas id="spaceCanvas" width="900" height="520"></canvas>
+    <button onclick="goHome()">Back to Menu</button>
+  </div>
+
+  <div id="memory" class="screen">
+    <h1>Memory Match</h1>
+    <div class="hud">
+      <div>Moves: <span id="memoryMoves">0</span></div>
+      <div>Best: <span id="memoryBest">999</span></div>
+      <div>Matches: <span id="memoryMatches">0</span>/8</div>
+    </div>
+    <p class="small">Tap two cards to match the pairs.</p>
+    <canvas id="memoryCanvas" width="900" height="520"></canvas>
+    <button onclick="goHome()">Back to Menu</button>
+  </div>
+
+  <div id="fox" class="screen">
+    <h1>Whack-a-Fox</h1>
+    <div class="hud">
+      <div>Score: <span id="foxScore">0</span></div>
+      <div>Best: <span id="foxBest">0</span></div>
+      <div>Time: <span id="foxTime">30</span></div>
+    </div>
+    <p class="small">Tap the foxes before time runs out.</p>
+    <canvas id="foxCanvas" width="900" height="520"></canvas>
+    <button onclick="goHome()">Back to Menu</button>
+  </div>
+
+  <div id="sprint" class="screen">
+    <h1>Chicken Sprint</h1>
+    <div class="hud">
+      <div>Score: <span id="sprintScore">0</span></div>
+      <div>Best: <span id="sprintBest">0</span></div>
+      <div>Lane: <span id="sprintLane">2</span></div>
+    </div>
+    <p class="small">Move between lanes to grab corn and dodge hay bales.</p>
+    <canvas id="sprintCanvas" width="900" height="520"></canvas>
     <button onclick="goHome()">Back to Menu</button>
   </div>
 
@@ -201,6 +285,16 @@
     const dctx = dartCanvas.getContext('2d');
     const arenaCanvas = document.getElementById('arenaCanvas');
     const actx = arenaCanvas.getContext('2d');
+    const eggCanvas = document.getElementById('eggCanvas');
+    const ectx = eggCanvas.getContext('2d');
+    const spaceCanvas = document.getElementById('spaceCanvas');
+    const sctx = spaceCanvas.getContext('2d');
+    const memoryCanvas = document.getElementById('memoryCanvas');
+    const mctx = memoryCanvas.getContext('2d');
+    const foxCanvas = document.getElementById('foxCanvas');
+    const fxctx = foxCanvas.getContext('2d');
+    const sprintCanvas = document.getElementById('sprintCanvas');
+    const spctx = sprintCanvas.getContext('2d');
     const scoreEl = document.getElementById('score');
     const bestScoreEl = document.getElementById('bestScore');
     const bestJumpsEl = document.getElementById('bestJumps');
@@ -225,12 +319,31 @@
     const menuBrickBestEl = document.getElementById('menuBrickBest');
     const menuDartBestEl = document.getElementById('menuDartBest');
     const menuArenaBestEl = document.getElementById('menuArenaBest');
+    const eggScoreEl = document.getElementById('eggScore');
+    const eggBestEl = document.getElementById('eggBest');
+    const eggLivesEl = document.getElementById('eggLives');
+    const spaceScoreEl = document.getElementById('spaceScore');
+    const spaceBestEl = document.getElementById('spaceBest');
+    const memoryMovesEl = document.getElementById('memoryMoves');
+    const memoryBestEl = document.getElementById('memoryBest');
+    const memoryMatchesEl = document.getElementById('memoryMatches');
+    const foxScoreEl = document.getElementById('foxScore');
+    const foxBestEl = document.getElementById('foxBest');
+    const foxTimeEl = document.getElementById('foxTime');
+    const sprintScoreEl = document.getElementById('sprintScore');
+    const sprintBestEl = document.getElementById('sprintBest');
+    const sprintLaneEl = document.getElementById('sprintLane');
 
     let animationId;
     let flappyAnimationId;
     let brickAnimationId;
     let dartAnimationId;
     let arenaAnimationId;
+    let eggAnimationId;
+    let spaceAnimationId;
+    let memoryAnimationId;
+    let foxAnimationId;
+    let sprintAnimationId;
     let currentGame = 'home';
     let gameRunning = false;
     let speed = 5;
@@ -265,6 +378,34 @@
     let arenaLives = 3;
     let arenaBest = Number(localStorage.getItem('chickenArenaBest') || 0);
     arenaBestEl.textContent = arenaBest;
+
+    let eggRunning = false;
+    let eggScore = 0;
+    let eggLives = 3;
+    let eggBest = Number(localStorage.getItem('eggCatcherBest') || 0);
+    eggBestEl.textContent = eggBest;
+
+    let spaceRunning = false;
+    let spaceScore = 0;
+    let spaceBest = Number(localStorage.getItem('spaceChickenBest') || 0);
+    spaceBestEl.textContent = spaceBest;
+
+    let memoryRunning = false;
+    let memoryMoves = 0;
+    let memoryBest = Number(localStorage.getItem('memoryChickenBest') || 999);
+    let memoryMatches = 0;
+    memoryBestEl.textContent = memoryBest;
+
+    let foxRunning = false;
+    let foxScore = 0;
+    let foxBest = Number(localStorage.getItem('whackFoxBest') || 0);
+    let foxTime = 30;
+    foxBestEl.textContent = foxBest;
+
+    let sprintRunning = false;
+    let sprintScore = 0;
+    let sprintBest = Number(localStorage.getItem('chickenSprintBest') || 0);
+    sprintBestEl.textContent = sprintBest;
 
     function refreshMenuRecords() {
       menuChickenBestEl.textContent = bestScore;
@@ -305,6 +446,11 @@
       if (id === 'brick') startBrickGame();
       if (id === 'dart') startDartGame();
       if (id === 'arena') startArenaGame();
+      if (id === 'egg') startEggGame();
+      if (id === 'space') startSpaceGame();
+      if (id === 'memory') startMemoryGame();
+      if (id === 'fox') startFoxGame();
+      if (id === 'sprint') startSprintGame();
     }
 
     function goHome() {
@@ -319,6 +465,16 @@
       cancelAnimationFrame(brickAnimationId);
       cancelAnimationFrame(dartAnimationId);
       cancelAnimationFrame(arenaAnimationId);
+      cancelAnimationFrame(eggAnimationId);
+      cancelAnimationFrame(spaceAnimationId);
+      cancelAnimationFrame(memoryAnimationId);
+      cancelAnimationFrame(foxAnimationId);
+      cancelAnimationFrame(sprintAnimationId);
+      eggRunning = false;
+      spaceRunning = false;
+      memoryRunning = false;
+      foxRunning = false;
+      sprintRunning = false;
       showScreen('home');
     }
 
@@ -1200,6 +1356,85 @@
       arenaAnimationId = requestAnimationFrame(arenaLoop);
     }
 
+    const basket = { x: 390, y: 445, width: 120, height: 26, moveLeft: false, moveRight: false };
+    let eggItems = [];
+    let eggFrame = 0;
+
+    function startEggGame() {
+      eggScore = 0; eggLives = 3; eggItems = []; eggFrame = 0; basket.x = 390;
+      eggScoreEl.textContent = eggScore; eggLivesEl.textContent = eggLives; eggBestEl.textContent = eggBest;
+      eggRunning = true; eggLoop();
+    }
+    function spawnEggItem() {
+      const good = Math.random() > 0.28;
+      eggItems.push({ x: 40 + Math.random() * 820, y: -20, r: 15, good });
+    }
+    function updateEggGame() {
+      eggFrame++;
+      if (eggFrame % 34 === 0) spawnEggItem();
+      if (basket.moveLeft) basket.x -= 9;
+      if (basket.moveRight) basket.x += 9;
+      basket.x = Math.max(0, Math.min(eggCanvas.width - basket.width, basket.x));
+      eggItems.forEach(item => item.y += 4.5);
+      eggItems = eggItems.filter(item => {
+        const caught = item.y + item.r >= basket.y && item.x >= basket.x && item.x <= basket.x + basket.width;
+        if (caught) {
+          if (item.good) eggScore += 2; else eggLives--;
+          eggScoreEl.textContent = eggScore; eggLivesEl.textContent = eggLives;
+          if (eggScore > eggBest) { eggBest = eggScore; localStorage.setItem('eggCatcherBest', eggBest); eggBestEl.textContent = eggBest; }
+          return false;
+        }
+        if (item.y > eggCanvas.height + 20) {
+          if (item.good) eggLives--;
+          eggLivesEl.textContent = eggLives;
+          return false;
+        }
+        return true;
+      });
+      if (eggLives <= 0) { eggRunning = false; cancelAnimationFrame(eggAnimationId); }
+    }
+    function drawEggGame() {
+      ectx.clearRect(0,0,eggCanvas.width,eggCanvas.height);
+      const g = ectx.createLinearGradient(0,0,0,eggCanvas.height); g.addColorStop(0,'#93c5fd'); g.addColorStop(1,'#dbeafe');
+      ectx.fillStyle = g; ectx.fillRect(0,0,eggCanvas.width,eggCanvas.height);
+      ectx.fillStyle = '#86efac'; ectx.fillRect(0,470,eggCanvas.width,50);
+      eggItems.forEach(item => { ectx.fillStyle = item.good ? '#f8fafc' : '#7f1d1d'; ectx.beginPath(); ectx.ellipse(item.x,item.y,item.r*0.8,item.r,0,0,Math.PI*2); ectx.fill(); if(item.good){ectx.fillStyle='#facc15'; ectx.beginPath(); ectx.ellipse(item.x,item.y,item.r*0.25,item.r*0.25,0,0,Math.PI*2); ectx.fill();}});
+      ectx.fillStyle='#8b5cf6'; ectx.beginPath(); ectx.roundRect(basket.x,basket.y,basket.width,basket.height,12); ectx.fill();
+      ectx.fillStyle='rgba(255,255,255,0.95)'; ectx.font='bold 22px Arial'; ectx.fillText('Catch fresh eggs!',20,34);
+      if(!eggRunning && eggLives<=0){ectx.fillStyle='rgba(0,0,0,0.45)'; ectx.fillRect(0,0,eggCanvas.width,eggCanvas.height); ectx.fillStyle='#fff'; ectx.font='38px Arial'; ectx.fillText('Game Over',360,210); ectx.font='22px Arial'; ectx.fillText('Press Space to restart',350,255);}
+    }
+    function eggLoop(){ updateEggGame(); drawEggGame(); if(eggRunning) eggAnimationId=requestAnimationFrame(eggLoop); }
+
+    const spaceBird = { x: 150, y: 250, vy: 0 };
+    let meteors = []; let stars = []; let spaceFrame = 0;
+    function startSpaceGame(){ spaceScore=0; meteors=[]; stars=[]; spaceFrame=0; spaceBird.y=250; spaceBird.vy=0; spaceScoreEl.textContent=spaceScore; spaceRunning=true; spaceLoop(); }
+    function flapSpace(){ if(currentGame!=='space') return; if(!spaceRunning){ startSpaceGame(); return;} spaceBird.vy=-7.5; }
+    function updateSpaceGame(){ spaceFrame++; if(spaceFrame%50===0) meteors.push({x:940,y:40+Math.random()*420,r:18+Math.random()*12}); if(spaceFrame%90===0) stars.push({x:940,y:40+Math.random()*420,r:10}); spaceBird.vy+=0.42; spaceBird.y+=spaceBird.vy; meteors.forEach(m=>m.x-=5); stars.forEach(s=>s.x-=4);
+      stars=stars.filter(s=>{ const hit=Math.hypot((spaceBird.x-s.x),(spaceBird.y-s.y))<24; if(hit){spaceScore+=5; spaceScoreEl.textContent=spaceScore; if(spaceScore>spaceBest){spaceBest=spaceScore; localStorage.setItem('spaceChickenBest',spaceBest); spaceBestEl.textContent=spaceBest;} return false;} return s.x>-30;});
+      meteors=meteors.filter(m=>m.x>-40); for(const m of meteors){ if(Math.hypot(spaceBird.x-m.x,spaceBird.y-m.y)<m.r+16){ spaceRunning=false; cancelAnimationFrame(spaceAnimationId);} }
+      if(spaceBird.y<20||spaceBird.y>500){ spaceRunning=false; cancelAnimationFrame(spaceAnimationId);} }
+    function drawSpaceGame(){ sctx.clearRect(0,0,spaceCanvas.width,spaceCanvas.height); sctx.fillStyle='#020617'; sctx.fillRect(0,0,spaceCanvas.width,spaceCanvas.height); for(let i=0;i<80;i++){ sctx.fillStyle='rgba(255,255,255,0.8)'; sctx.fillRect((i*97)%900,(i*61+spaceFrame*0.3)%520,2,2);} stars.forEach(s=>{sctx.fillStyle='#fde68a'; sctx.beginPath(); sctx.arc(s.x,s.y,s.r,0,Math.PI*2); sctx.fill();}); meteors.forEach(m=>{const gr=sctx.createRadialGradient(m.x-4,m.y-4,2,m.x,m.y,m.r); gr.addColorStop(0,'#fdba74'); gr.addColorStop(1,'#7c2d12'); sctx.fillStyle=gr; sctx.beginPath(); sctx.arc(m.x,m.y,m.r,0,Math.PI*2); sctx.fill();}); sctx.fillStyle='#facc15'; sctx.beginPath(); sctx.ellipse(spaceBird.x,spaceBird.y,22,18,0,0,Math.PI*2); sctx.fill(); sctx.fillStyle='#fff'; sctx.font='bold 22px Arial'; sctx.fillText('Collect stars, dodge meteors!',20,34); if(!spaceRunning){ sctx.fillStyle='rgba(0,0,0,0.45)'; sctx.fillRect(0,0,900,520); sctx.fillStyle='#fff'; sctx.font='38px Arial'; sctx.fillText('Game Over',360,210); sctx.font='22px Arial'; sctx.fillText('Tap or press Space to restart',315,255);} }
+    function spaceLoop(){ updateSpaceGame(); drawSpaceGame(); if(spaceRunning) spaceAnimationId=requestAnimationFrame(spaceLoop); }
+
+    let memoryCards=[]; let memoryFlipped=[]; let memoryLock=false;
+    function startMemoryGame(){ const vals=[1,2,3,4,5,6,7,8,1,2,3,4,5,6,7,8].sort(()=>Math.random()-0.5); memoryCards=vals.map((v,i)=>({v,up:false,done:false,x:40+(i%4)*205,y:70+Math.floor(i/4)*100,w:170,h:80})); memoryFlipped=[]; memoryLock=false; memoryMoves=0; memoryMatches=0; memoryMovesEl.textContent=0; memoryMatchesEl.textContent=0; memoryBestEl.textContent=memoryBest; memoryRunning=true; drawMemoryGame(); }
+    function handleMemoryClick(x,y){ if(currentGame!=='memory'||memoryLock) return; for(const c of memoryCards){ if(!c.done&&!c.up&&x>=c.x&&x<=c.x+c.w&&y>=c.y&&y<=c.y+c.h){ c.up=true; memoryFlipped.push(c); if(memoryFlipped.length===2){ memoryMoves++; memoryMovesEl.textContent=memoryMoves; memoryLock=true; if(memoryFlipped[0].v===memoryFlipped[1].v){ memoryFlipped[0].done=true; memoryFlipped[1].done=true; memoryMatches++; memoryMatchesEl.textContent=memoryMatches; memoryFlipped=[]; memoryLock=false; if(memoryMatches===8&&memoryMoves<memoryBest){ memoryBest=memoryMoves; localStorage.setItem('memoryChickenBest',memoryBest); memoryBestEl.textContent=memoryBest; } } else { setTimeout(()=>{ memoryFlipped.forEach(f=>f.up=false); memoryFlipped=[]; memoryLock=false; drawMemoryGame(); },700); } } break; } } drawMemoryGame(); }
+    function drawMemoryGame(){ mctx.clearRect(0,0,900,520); const g=mctx.createLinearGradient(0,0,0,520); g.addColorStop(0,'#ddd6fe'); g.addColorStop(1,'#f5d0fe'); mctx.fillStyle=g; mctx.fillRect(0,0,900,520); memoryCards.forEach(c=>{ mctx.fillStyle=(c.up||c.done)?'#fff7ed':'#7c3aed'; mctx.beginPath(); mctx.roundRect(c.x,c.y,c.w,c.h,18); mctx.fill(); if(c.up||c.done){ mctx.fillStyle='#111827'; mctx.font='bold 34px Arial'; mctx.fillText('🐔'+c.v,c.x+48,c.y+50);} else { mctx.fillStyle='rgba(255,255,255,0.9)'; mctx.font='bold 28px Arial'; mctx.fillText('?',c.x+78,c.y+50);} }); mctx.fillStyle='#fff'; mctx.font='bold 22px Arial'; mctx.fillText('Match all the pairs!',20,34); }
+
+    let foxHoles=[]; let foxTarget=-1; let foxFrame=0;
+    function startFoxGame(){ foxScore=0; foxTime=30; foxFrame=0; foxHoles=[]; for(let i=0;i<6;i++) foxHoles.push({x:120+(i%3)*230,y:170+Math.floor(i/3)*150}); foxTarget=-1; foxScoreEl.textContent=0; foxTimeEl.textContent=30; foxRunning=true; foxLoop(); }
+    function handleFoxHit(x,y){ if(currentGame!=='fox'||!foxRunning) return; if(foxTarget>=0){ const h=foxHoles[foxTarget]; if(Math.hypot(x-h.x,y-(h.y-35))<45){ foxScore+=5; foxScoreEl.textContent=foxScore; if(foxScore>foxBest){foxBest=foxScore; localStorage.setItem('whackFoxBest',foxBest); foxBestEl.textContent=foxBest;} foxTarget=-1; } } }
+    function updateFoxGame(){ foxFrame++; if(foxFrame%35===0) foxTarget=Math.floor(Math.random()*6); if(foxFrame%60===0){ foxTime--; foxTimeEl.textContent=foxTime; if(foxTime<=0){ foxRunning=false; cancelAnimationFrame(foxAnimationId);} } }
+    function drawFoxGame(){ fxctx.clearRect(0,0,900,520); const g=fxctx.createLinearGradient(0,0,0,520); g.addColorStop(0,'#86efac'); g.addColorStop(1,'#14532d'); fxctx.fillStyle=g; fxctx.fillRect(0,0,900,520); foxHoles.forEach((h,i)=>{ fxctx.fillStyle='#422006'; fxctx.beginPath(); fxctx.ellipse(h.x,h.y,70,30,0,0,Math.PI*2); fxctx.fill(); if(i===foxTarget){ fxctx.fillStyle='#f97316'; fxctx.beginPath(); fxctx.arc(h.x,h.y-38,34,0,Math.PI*2); fxctx.fill(); fxctx.fillStyle='#fff'; fxctx.beginPath(); fxctx.arc(h.x-12,h.y-42,7,0,Math.PI*2); fxctx.arc(h.x+12,h.y-42,7,0,Math.PI*2); fxctx.fill(); fxctx.fillStyle='#111'; fxctx.beginPath(); fxctx.arc(h.x-12,h.y-42,3,0,Math.PI*2); fxctx.arc(h.x+12,h.y-42,3,0,Math.PI*2); fxctx.fill(); }}); fxctx.fillStyle='#fff'; fxctx.font='bold 22px Arial'; fxctx.fillText('Tap the foxes!',20,34); if(!foxRunning){fxctx.fillStyle='rgba(0,0,0,0.45)'; fxctx.fillRect(0,0,900,520); fxctx.fillStyle='#fff'; fxctx.font='38px Arial'; fxctx.fillText('Time Up!',380,210); fxctx.font='22px Arial'; fxctx.fillText('Tap to play again',375,255);} }
+    function foxLoop(){ updateFoxGame(); drawFoxGame(); if(foxRunning) foxAnimationId=requestAnimationFrame(foxLoop); }
+
+    let sprintLane=1; let sprintItems=[]; let sprintFrame=0;
+    function startSprintGame(){ sprintScore=0; sprintLane=1; sprintItems=[]; sprintFrame=0; sprintScoreEl.textContent=0; sprintLaneEl.textContent=2; sprintRunning=true; sprintLoop(); }
+    function setSprintLane(n){ sprintLane=Math.max(0,Math.min(2,n)); sprintLaneEl.textContent=sprintLane+1; }
+    function updateSprintGame(){ sprintFrame++; if(sprintFrame%35===0){ sprintItems.push({lane:Math.floor(Math.random()*3), y:-30, good:Math.random()>0.35}); } sprintItems.forEach(i=>i.y+=6); sprintItems=sprintItems.filter(i=>{ const hit=i.y>390&&i.y<465&&i.lane===sprintLane; if(hit){ if(i.good){ sprintScore+=3; sprintScoreEl.textContent=sprintScore; if(sprintScore>sprintBest){ sprintBest=sprintScore; localStorage.setItem('chickenSprintBest',sprintBest); sprintBestEl.textContent=sprintBest; } } else { sprintRunning=false; cancelAnimationFrame(sprintAnimationId);} return false; } return i.y<560; }); }
+    function drawSprintGame(){ spctx.clearRect(0,0,900,520); const g=spctx.createLinearGradient(0,0,0,520); g.addColorStop(0,'#bae6fd'); g.addColorStop(1,'#e0f2fe'); spctx.fillStyle=g; spctx.fillRect(0,0,900,520); for(let i=0;i<3;i++){ spctx.fillStyle='#9ca3af'; spctx.fillRect(120+i*220,0,160,520);} sprintItems.forEach(i=>{ const x=200+i.lane*220; if(i.good){ spctx.fillStyle='#facc15'; spctx.beginPath(); spctx.arc(x,i.y,16,0,Math.PI*2); spctx.fill(); } else { spctx.fillStyle='#a16207'; spctx.beginPath(); spctx.roundRect(x-28,i.y-18,56,36,14); spctx.fill(); } }); const cx=200+sprintLane*220; spctx.fillStyle='#facc15'; spctx.beginPath(); spctx.ellipse(cx,430,26,20,0,0,Math.PI*2); spctx.fill(); spctx.fillStyle='#fff'; spctx.font='bold 22px Arial'; spctx.fillText('Grab corn, dodge hay!',20,34); if(!sprintRunning){ spctx.fillStyle='rgba(0,0,0,0.45)'; spctx.fillRect(0,0,900,520); spctx.fillStyle='#fff'; spctx.font='38px Arial'; spctx.fillText('Game Over',360,210); spctx.font='22px Arial'; spctx.fillText('Tap or press Space to restart',320,255);} }
+    function sprintLoop(){ updateSprintGame(); drawSprintGame(); if(sprintRunning) sprintAnimationId=requestAnimationFrame(sprintLoop); }
+
     const dartPlayer = {
       x: 120,
       y: 410,
@@ -1545,15 +1780,123 @@
     }, { passive: false });
 
     window.addEventListener('keydown', e => {
-      if (currentGame !== 'arena') return;
-      if (e.code === 'ArrowLeft' || e.code === 'KeyA') arenaChicken.moveLeft = true;
-      if (e.code === 'ArrowRight' || e.code === 'KeyD') arenaChicken.moveRight = true;
+      if (currentGame === 'arena') {
+        if (e.code === 'ArrowLeft' || e.code === 'KeyA') arenaChicken.moveLeft = true;
+        if (e.code === 'ArrowRight' || e.code === 'KeyD') arenaChicken.moveRight = true;
+      }
+      if (currentGame === 'egg') {
+        if (e.code === 'ArrowLeft' || e.code === 'KeyA') basket.moveLeft = true;
+        if (e.code === 'ArrowRight' || e.code === 'KeyD') basket.moveRight = true;
+      }
+      if (currentGame === 'space' && e.code === 'Space') { e.preventDefault(); flapSpace(); }
+      if (currentGame === 'sprint') {
+        if (e.code === 'ArrowLeft' || e.code === 'KeyA') setSprintLane(sprintLane - 1);
+        if (e.code === 'ArrowRight' || e.code === 'KeyD') setSprintLane(sprintLane + 1);
+        if (e.code === 'Space' && !sprintRunning) startSprintGame();
+      }
+      if (currentGame === 'egg' && e.code === 'Space' && !eggRunning) startEggGame();
+      if (currentGame === 'fox' && e.code === 'Space' && !foxRunning) startFoxGame();
     });
 
     window.addEventListener('keyup', e => {
-      if (e.code === 'ArrowLeft' || e.code === 'KeyA') arenaChicken.moveLeft = false;
-      if (e.code === 'ArrowRight' || e.code === 'KeyD') arenaChicken.moveRight = false;
+      if (e.code === 'ArrowLeft' || e.code === 'KeyA') { arenaChicken.moveLeft = false; basket.moveLeft = false; }
+      if (e.code === 'ArrowRight' || e.code === 'KeyD') { arenaChicken.moveRight = false; basket.moveRight = false; }
     });
+
+    arenaCanvas.addEventListener('touchstart', e => {
+      if (currentGame !== 'arena') return;
+      e.preventDefault();
+      const rect = arenaCanvas.getBoundingClientRect();
+      const x = e.touches[0].clientX - rect.left;
+      arenaChicken.moveLeft = x < rect.width / 2;
+      arenaChicken.moveRight = x >= rect.width / 2;
+    }, { passive: false });
+
+    arenaCanvas.addEventListener('touchmove', e => {
+      if (currentGame !== 'arena') return;
+      e.preventDefault();
+      const rect = arenaCanvas.getBoundingClientRect();
+      const x = e.touches[0].clientX - rect.left;
+      arenaChicken.moveLeft = x < rect.width / 2;
+      arenaChicken.moveRight = x >= rect.width / 2;
+    }, { passive: false });
+
+    arenaCanvas.addEventListener('touchend', e => {
+      if (currentGame !== 'arena') return;
+      e.preventDefault();
+      arenaChicken.moveLeft = false;
+      arenaChicken.moveRight = false;
+    }, { passive: false });
+
+    eggCanvas.addEventListener('touchstart', e => {
+      if (currentGame !== 'egg') return;
+      e.preventDefault();
+      const rect = eggCanvas.getBoundingClientRect();
+      const x = e.touches[0].clientX - rect.left;
+      basket.moveLeft = x < rect.width / 2;
+      basket.moveRight = x >= rect.width / 2;
+    }, { passive: false });
+
+    eggCanvas.addEventListener('touchmove', e => {
+      if (currentGame !== 'egg') return;
+      e.preventDefault();
+      const rect = eggCanvas.getBoundingClientRect();
+      const x = e.touches[0].clientX - rect.left;
+      basket.moveLeft = x < rect.width / 2;
+      basket.moveRight = x >= rect.width / 2;
+    }, { passive: false });
+
+    eggCanvas.addEventListener('touchend', e => {
+      if (currentGame !== 'egg') return;
+      e.preventDefault();
+      basket.moveLeft = false;
+      basket.moveRight = false;
+    }, { passive: false });
+
+    memoryCanvas.addEventListener('click', e => {
+      if (currentGame !== 'memory') return;
+      const rect = memoryCanvas.getBoundingClientRect();
+      handleMemoryClick(e.clientX - rect.left, e.clientY - rect.top);
+    });
+    memoryCanvas.addEventListener('touchstart', e => {
+      if (currentGame !== 'memory') return;
+      e.preventDefault();
+      const rect = memoryCanvas.getBoundingClientRect();
+      handleMemoryClick(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
+    }, { passive: false });
+
+    foxCanvas.addEventListener('click', e => {
+      const rect = foxCanvas.getBoundingClientRect();
+      if (!foxRunning) { startFoxGame(); return; }
+      handleFoxHit(e.clientX - rect.left, e.clientY - rect.top);
+    });
+    foxCanvas.addEventListener('touchstart', e => {
+      e.preventDefault();
+      const rect = foxCanvas.getBoundingClientRect();
+      if (!foxRunning) { startFoxGame(); return; }
+      handleFoxHit(e.touches[0].clientX - rect.left, e.touches[0].clientY - rect.top);
+    }, { passive: false });
+
+    spaceCanvas.addEventListener('click', flapSpace);
+    spaceCanvas.addEventListener('touchstart', e => { e.preventDefault(); flapSpace(); }, { passive: false });
+
+    sprintCanvas.addEventListener('click', e => {
+      const rect = sprintCanvas.getBoundingClientRect();
+      if (!sprintRunning) { startSprintGame(); return; }
+      const x = e.clientX - rect.left;
+      if (x < rect.width / 3) setSprintLane(0);
+      else if (x < rect.width * 2 / 3) setSprintLane(1);
+      else setSprintLane(2);
+    });
+    sprintCanvas.addEventListener('touchstart', e => {
+      e.preventDefault();
+      const rect = sprintCanvas.getBoundingClientRect();
+      if (!sprintRunning) { startSprintGame(); return; }
+      const x = e.touches[0].clientX - rect.left;
+      if (x < rect.width / 3) setSprintLane(0);
+      else if (x < rect.width * 2 / 3) setSprintLane(1);
+      else setSprintLane(2);
+    }, { passive: false });
   </script>
 </body>
 </html>
